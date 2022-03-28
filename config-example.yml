@@ -1,0 +1,18 @@
+---
+# default auth credentials for login to devices
+auth:
+  user: supergooduser
+  pass: looksgoodpassword
+
+datacenters:
+  # First datacenter but empty (following keys are required)
+  - name: DC1
+    devices: []
+
+  # Second datacenter
+  - name: DC2
+    devices:
+    - name: switch1.corp.company.com  # hostname of device
+      type: juniper                   # use netmiko device_types here
+    - name: 'firewall1.corp.company.com'
+      type: 'paloalto_panos'

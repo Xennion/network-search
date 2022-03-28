@@ -1,0 +1,27 @@
+[tool.poetry]
+authors = ["Codie Jones <codiejones1@gmail.com>"]
+description = "looks good"
+name = "network_search_api"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+PyYAML = "^6.0"
+SQLAlchemy = "^1.4.32"
+arrow = "^1.2.2"
+aws-secretsmanager-caching = "^1.1.1"
+boto3 = "^1.21.25"
+botocore = "^1.24.25"
+fastapi = "^0.74.1"
+ipaddress = "^1.0.23"
+netmiko = "^3.4.0"
+python = "^3.10"
+python-dotenv = "^0.19.2"
+uvicorn = "^0.17.5"
+
+[tool.poetry.dev-dependencies]
+black = {version = "^22.1.0", allow-prereleases = true}
+ipython = "^8.1.1"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
