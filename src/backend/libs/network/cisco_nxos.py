@@ -43,12 +43,16 @@ def get_networks(connection, datacenter):
 
     ip_data = [net for net in ip_data if "Vlan" in net["intf-name"]]
     for vlan in vlans:
-        vlan_match = [net for net in ip_data if str(vlan["vlan"]) in net["intf-name"]]
+        vlan_match = [
+            net for net in ip_data if f"Vlan{vlan['vlan']}" == net["intf-name"]
+        ]
         if not len(vlan_match) or not "prefix" in vlan_match[0]:
             final_network_data.append(vlan)
             continue
         vlan_match = vlan_match[0]
-        ipv4_interface = IPv4Interface(f"{vlan_match['prefix']}/{vlan_match['masklen']}")
+        ipv4_interface = IPv4Interface(
+            f"{vlan_match['prefix']}/{vlan_match['masklen']}"
+        )
         vlan.update(ipv4_model(ipv4_interface))
         final_network_data.append(vlan)
     logger.trace(f"Collected {len(final_network_data)} networks from {connection.host}")
