@@ -59,12 +59,11 @@ def get_networks(connection, datacenter) -> list[NetworkSchema]:
             continue
         ip_data.append({"vlan": ip_vlan, "obj": IPv4Interface(ip_address[0])})
 
-    logger.trace(f"Collected {len(ip_data)} networks from {connection.host}")
     for vlan in vlans:
         network_match = [x for x in ip_data if x["vlan"] == vlan["vlan"]]
         if network_match:
             network_match = network_match[0]
             vlan.update(ipv4_model(network_match["obj"]))
         final_network_data.append(vlan)
-
+    logger.trace(f"Collected {len(final_network_data)} networks from {connection.host}")
     return final_network_data

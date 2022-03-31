@@ -34,29 +34,22 @@ def get_vlans(connection, datacenter):
 def get_networks(connection, datacenter):
     final_network_data = []
     vlans = get_vlans(connection, datacenter)
+    logger.trace(f"Collected {len(vlans)} vlans from {connection.host}")
+    network_command = "show ip int vrf all | json"
+    logger.trace(f"Running command '{network_command}' on {connection.host}")
 
-    ip_data = loads(connection.send_command(f"show ip int vrf all | json"))
+    ip_data = loads(connection.send_command(network_command))
     ip_data = ip_data["TABLE_intf"]["ROW_intf"]
-    import json
 
     ip_data = [net for net in ip_data if "Vlan" in net["intf-name"]]
-    print(json.dumps(ip_data, indent=4))
-
-    # for vlan in vlans:
-
-    #     parsed_keys = {
-    #         key.replace("-", "_"): value
-    #         for key, value in ip_data["TABLE_intf"]["ROW_intf"].items()
-    #     }
-
-    #     if parsed_keys["ip_disabled"] == "TRUE":
-    #         continue
-    #     if not "prefix" in parsed_keys:
-    #         final_network_data.append(vlan)
-    #         continue
-    #     ipv4_interface = IPv4Interface(
-    #         f"{parsed_keys['prefix']}/{parsed_keys['masklen']}"
-    #     )
-    #     vlan.update(ipv4_model(ipv4_interface))
-    #     final_network_data.append(vlan)
-    # return final_network_data
+    for vlan in vlans:
+        vlan_match = [net for net in ip_data if str(vlan["vlan"]) in net["intf-name"]]
+        if not len(vlan_match) or not "prefix" in vlan_match[0]:
+            final_network_data.append(vlan)
+            continue
+        vlan_match = vlan_match[0]
+        ipv4_interface = IPv4Interface(f"{vlan_match['prefix']}/{vlan_match['masklen']}")
+        vlan.update(ipv4_model(ipv4_interface))
+        final_network_data.append(vlan)
+    logger.trace(f"Collected {len(final_network_data)} networks from {connection.host}")
+    return final_network_data
