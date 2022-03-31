@@ -17,6 +17,8 @@ netmiko = "^3.4.0"
 python = "^3.10"
 python-dotenv = "^0.19.2"
 uvicorn = "^0.17.5"
+click = "^8.1.0"
+loguru = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^22.1.0", allow-prereleases = true}

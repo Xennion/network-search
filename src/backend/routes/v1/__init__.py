@@ -116,3 +116,10 @@ def poll(datacenter, db: Session = Depends(get_db), timeout=None):
 
     print(f"Stored {len(api_result)} rows in database for DC: {datacenter}")
     return api_result
+
+
+@v1_router.get("/health")
+def health(db: Session = Depends(get_db)):
+    # things that would synthetically test the app works
+    # query a database table for a row
+    return {"message": "looks good"}

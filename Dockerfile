@@ -66,4 +66,5 @@ COPY --from=backend-builder-base $PYSETUP_PATH /app/backend
 COPY --from=frontend-builder-base /app/frontend/dist /app/frontend/dist
 
 WORKDIR /app/backend
+EXPOSE 80
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]

@@ -1,5 +1,6 @@
 import re
 from ipaddress import IPv4Interface
+from loguru import logger
 
 from schemas.network import NetworkSchema
 from libs.common import ipv4_model
@@ -7,7 +8,9 @@ from libs.common import ipv4_model
 
 def get_networks(connection, datacenter) -> list[NetworkSchema]:
     final_network_data = []
-    data_raw = connection.send_command("show interface logical")
+    net_command = "show interface logical"
+    logger.trace(f"Running command '{net_command}' on {connection.host}")
+    data_raw = connection.send_command(net_command)
     lines = data_raw.split("\n")
 
     for line in lines:
@@ -31,5 +34,7 @@ def get_networks(connection, datacenter) -> list[NetworkSchema]:
                 **ipv4_model(ip),
             },
         )
+
+    logger.trace(f"Collected {len(final_network_data)} networks from {connection.host}")
 
     return final_network_data

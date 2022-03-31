@@ -1,6 +1,15 @@
 from netmiko import ConnectHandler
+from loguru import logger
+import sys
+import os
 
 from . import juniper, paloalto_panos, cisco_nxos
+
+logger.remove(0)
+logger.add(
+    sys.stderr,
+    level=os.environ.get("LOGLEVEL").upper() if os.environ.get("LOGLEVEL") else "DEBUG",
+)
 
 
 class NetworkDevice:
@@ -25,7 +34,9 @@ class NetworkDevice:
             "username": self.__username,
             "password": self.__password,
         }
+        logger.trace(f"Connecting to {self.__host} device type '{self.__device_type}'")
         connection = ConnectHandler(**device)
+        logger.trace(f"Successfully connected to {self.__host}")
 
         if self.__device_type == "juniper":
             result = juniper.get_networks(connection, self.__datacenter)
