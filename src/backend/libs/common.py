@@ -4,25 +4,33 @@ from copy import deepcopy
 
 def merge_networks(current_networks, new_networks):
     merged_networks = deepcopy(current_networks)
-    for device_network in new_networks:
-        existing = [x for x in merged_networks if x["vlan"] == device_network["vlan"]]
+
+    # search and update existing networks
+    for new_network in new_networks:
+        existing = [
+            network
+            for network in merged_networks
+            if network["vlan"] == new_network["vlan"]
+        ]
         if existing:
             existing = existing[0]
             if not existing["network"]:
-                existing["network"] = device_network["network"]
-                existing["gateway"] = device_network["gateway"]
-                existing["network_address"] = device_network["network_address"]
-                existing["broadcast_address"] = device_network["broadcast_address"]
-                existing["netmask"] = device_network["netmask"]
-                existing["bitmask"] = device_network["bitmask"]
-                existing["first_usable_ip"] = device_network["first_usable_ip"]
-                existing["last_usable_ip"] = device_network["last_usable_ip"]
-                existing["origin_device"] = device_network["origin_device"]
+                existing["network"] = new_network["network"]
+                existing["gateway"] = new_network["gateway"]
+                existing["network_address"] = new_network["network_address"]
+                existing["broadcast_address"] = new_network["broadcast_address"]
+                existing["netmask"] = new_network["netmask"]
+                existing["bitmask"] = new_network["bitmask"]
+                existing["first_usable_ip"] = new_network["first_usable_ip"]
+                existing["last_usable_ip"] = new_network["last_usable_ip"]
+                existing["origin_device"] = new_network["origin_device"]
         else:
-            merged_networks.append(device_network)
+            merged_networks.append(new_network)
 
+    # create a unique id for each network
     for network in merged_networks:
         network["id"] = f"{network['datacenter']}:{network['vlan']}"
+
     return merged_networks
 
 
