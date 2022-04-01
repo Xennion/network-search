@@ -1,14 +1,9 @@
 <template>
   <div>
     <section class="hero container">
-      <b-image
-        v-if="imagePath"
-        :src="imagePath"
-        class="container hero-image"
-      ></b-image>
+      <b-image v-if="imagePath" :src="imagePath" class="container hero-image"></b-image>
+      <div :class="{ 'hero-offset': imagePath, 'hero-text': true }">Network Search</div>
     </section>
-
-    <div v-if="!imagePath" style="margin-top: 24px"></div>
 
     <section class="container">
       <div class="form columns">
@@ -16,16 +11,10 @@
           <!-- Column Selector -->
           <b-dropdown v-model="selectedColumns" multiple aria-role="list">
             <template #trigger>
-              <b-button type="is-danger" icon-right="menu-down"
-                >Columns</b-button
-              >
+              <b-button type="is-danger" icon-right="menu-down">Columns</b-button>
             </template>
             <div v-for="column of columns" :key="column.field">
-              <b-dropdown-item
-                class="dropdown-item"
-                :value="column"
-                aria-role="listitem"
-              >
+              <b-dropdown-item class="dropdown-item" :value="column" aria-role="listitem">
                 <span>{{ column.label }}</span>
               </b-dropdown-item>
             </div>
@@ -34,24 +23,19 @@
           <!-- Datacenter Selector -->
           <b-dropdown v-model="selectedDatacenters" multiple aria-role="list">
             <template #trigger>
-              <b-button type="is-primary" icon-right="menu-down"
-                >Datacenters ({{ selectedDatacenters.length }})</b-button
-              >
+              <b-button
+                type="is-primary"
+                icon-right="menu-down"
+              >Datacenters ({{ selectedDatacenters.length }})</b-button>
             </template>
             <div v-for="datacenter of datacenters" :key="datacenter">
-              <b-dropdown-item
-                class="dropdown-item"
-                :value="datacenter"
-                aria-role="listitem"
-              >
+              <b-dropdown-item class="dropdown-item" :value="datacenter" aria-role="listitem">
                 <span>{{ datacenter }}</span>
               </b-dropdown-item>
             </div>
           </b-dropdown>
 
-          <b-switch v-model="allDatacenters" class="control"
-            >All Datacenters</b-switch
-          >
+          <b-switch v-model="allDatacenters" class="all-dcs">All Datacenters</b-switch>
         </div>
         <div class="column is-half export-button">
           <b-dropdown aria-role="list">
@@ -61,8 +45,7 @@
                 icon-left="database-export"
                 icon-right="menu-down"
                 class="has-background-success"
-                >Export</b-button
-              >
+              >Export</b-button>
             </template>
             <b-dropdown-item aria-role="listitem" v-on:click="exportData('json')">
               <div class="media">
@@ -86,12 +69,7 @@
         </div>
       </div>
       <div>
-        <b-input
-          placeholder="Search..."
-          v-model="search"
-          icon="magnify"
-          size="is-medium"
-        ></b-input>
+        <b-input :placeholder="searchPlaceholder" v-model="search" icon="magnify" size="is-medium"></b-input>
       </div>
     </section>
 
@@ -203,6 +181,9 @@ export default {
     },
   },
   computed: {
+    searchPlaceholder() {
+      return `Search ${this.networks.length} networks...`
+    },
     filteredColumns() {
       return this.columns.filter((column) => column.visible);
     },
@@ -265,15 +246,15 @@ export default {
     },
     exportData(dataType) {
       let blob
-      switch(dataType) {
+      switch (dataType) {
         case 'json':
-          blob = new Blob([JSON.stringify(this.filteredNetworks, null, 4)], { type: 'text/json;charset=utf-8'})
+          blob = new Blob([JSON.stringify(this.filteredNetworks, null, 4)], { type: 'text/json;charset=utf-8' })
           break
         case 'csv':
           blob = new Blob([Papa.unparse(this.filteredNetworks)], { type: 'text/csv;charset=utf-8' })
           break
       }
-      const urlBlob = URL .createObjectURL(blob)
+      const urlBlob = URL.createObjectURL(blob)
       const anchor = document.createElement('a')
       anchor.href = urlBlob
       anchor.target = "_blank"
@@ -297,6 +278,20 @@ export default {
   padding-bottom: 50px;
 }
 
+.hero-text {
+  text-align: center;
+  color: #fff;
+  font-family: "Roboto";
+  font-size: 3rem;
+  font-weight: bold;
+  letter-spacing: 0.22rem;
+  padding-bottom: 2rem;
+}
+
+.hero-offset {
+  margin-top: -3rem;
+}
+
 .form {
   padding-left: 10px;
 }
@@ -305,9 +300,9 @@ export default {
   padding-top: 20px;
 }
 
-.control {
+.all-dcs {
   margin-top: 8px;
-  padding-left: 8px;
+  padding-left: 16px;
   color: #fff;
 }
 
