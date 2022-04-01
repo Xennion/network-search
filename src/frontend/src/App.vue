@@ -199,7 +199,7 @@ export default {
     datacenters() {
       const datacenters = new Set();
       this.networks.map((network) => datacenters.add(network.datacenter));
-      return Array.from(datacenters);
+      return Array.from(datacenters).sort();
     },
     filteredNetworks() {
       let result = this.networks.filter((network) =>
