@@ -1,21 +1,25 @@
+import re
 from ipaddress import IPv4Interface
-from json import loads
 from loguru import logger
+from schemas.network import NetworkSchema
 
 from libs.common import ipv4_model
 
 
-def get_vlans(connection, datacenter):
-    vlan_data = []
-    vlan_command = "show vlan | json"
+def get_vlans(connection, datacenter) -> list[NetworkSchema]:
+    vlan_command = 'show vlan brief'
     logger.trace(f"Running command '{vlan_command}' on {connection.host}")
-    vlan_data_json = loads(connection.send_command(vlan_command))
-    parsed_vlans = vlan_data_json["TABLE_vlanbrief"]["ROW_vlanbrief"]
-    for vlan in parsed_vlans:
+    vlan_data_raw = connection.send_command(vlan_command)
+    vlan_lines = vlan_data_raw.split('\n')
+    vlan_data = []
+
+    for line in vlan_lines:
+        vlan = re.search("^(\d{1,4})\s+(\S+)", line)
+        if not vlan: continue
         vlan_data.append(
             {
-                "vlan": int(vlan["vlanshowbr-vlanid"]),
-                "description": vlan["vlanshowbr-vlanname"],
+                "vlan": int(vlan.group(1)),
+                "description": vlan.group(2),
                 "datacenter": datacenter,
                 "origin_device": connection.host,
                 "network": "",
@@ -30,29 +34,17 @@ def get_vlans(connection, datacenter):
         )
     return vlan_data
 
-
-def get_networks(connection, datacenter):
-    final_network_data = []
+def get_networks(connection, datacenter) -> list[NetworkSchema]:
     vlans = get_vlans(connection, datacenter)
     logger.trace(f"Collected {len(vlans)} vlans from {connection.host}")
-    network_command = "show ip int vrf all | json"
+    network_command = 'show ip int vrf all'
     logger.trace(f"Running command '{network_command}' on {connection.host}")
-
-    ip_data = loads(connection.send_command(network_command))
-    ip_data = ip_data["TABLE_intf"]["ROW_intf"]
-
-    ip_data = [net for net in ip_data if "Vlan" in net["intf-name"]]
+    ip_data_raw = connection.send_command(network_command)
+    final_network_data = []
     for vlan in vlans:
-        vlan_match = [
-            net for net in ip_data if f"Vlan{vlan['vlan']}" == net["intf-name"]
-        ]
-        if not len(vlan_match) or not "prefix" in vlan_match[0]:
-            final_network_data.append(vlan)
-            continue
-        vlan_match = vlan_match[0]
-        ipv4_interface = IPv4Interface(
-            f"{vlan_match['prefix']}/{vlan_match['masklen']}"
-        )
+        vlan_match = re.search(rf'(^Vlan{vlan["vlan"]}\b).+\n.+?subnet: (?=\d)(.+?(?= route))', ip_data_raw, re.MULTILINE)
+        if not vlan_match: continue
+        ipv4_interface = IPv4Interface(vlan_match.group(2))
         vlan.update(ipv4_model(ipv4_interface))
         final_network_data.append(vlan)
     logger.trace(f"Collected {len(final_network_data)} networks from {connection.host}")
