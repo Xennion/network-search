@@ -42,10 +42,13 @@ def get_networks(connection, datacenter) -> list[NetworkSchema]:
     ip_data_raw = connection.send_command(network_command)
     final_network_data = []
     for vlan in vlans:
-        net_match = re.search(rf'(^Vlan{vlan["vlan"]}),.+\n.+?subnet: (\S+)', ip_data_raw, re.MULTILINE)
+        net_match = re.search(rf'^Vlan{vlan["vlan"]},.+\n.+?address: (\S+),.+?subnet: (\S+)', ip_data_raw, re.MULTILINE)
         if not net_match: continue
-        ipv4_interface = IPv4Interface(net_match.group(2))
-        vlan.update(ipv4_model(ipv4_interface))
+        ip_interface = IPv4Interface(net_match.group(1))
+        ip_network = IPv4Interface(net_match.group(2))
+        vlan.update(ipv4_model(ip_network))
+        if int(ip_interface) == int(ip_network) + 1:
+            vlan['gateway'] = net_match.group(1)
         final_network_data.append(vlan)
     logger.trace(f"Collected {len(final_network_data)} networks from {connection.host}")
     return final_network_data
