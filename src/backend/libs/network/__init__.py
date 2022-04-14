@@ -3,7 +3,7 @@ from loguru import logger
 import sys
 import os
 
-from . import juniper, paloalto_panos, cisco_nxos
+from netdisc import get_juniper_networks, get_nxos_networks, get_panos_networks
 
 logger.remove(0)
 logger.add(
@@ -39,11 +39,11 @@ class NetworkDevice:
         logger.trace(f"Successfully connected to {self.__host}")
 
         if self.__device_type == "juniper":
-            result = juniper.get_networks(connection, self.__datacenter)
+            result = get_juniper_networks(connection, self.__datacenter)
         elif self.__device_type == "paloalto_panos":
-            result = paloalto_panos.get_networks(connection, self.__datacenter)
+            result = get_panos_networks(connection, self.__datacenter)
         elif self.__device_type == "cisco_nxos":
-            result = cisco_nxos.get_networks(connection, self.__datacenter)
+            result = get_nxos_networks(connection, self.__datacenter)
         else:
             result = []
 

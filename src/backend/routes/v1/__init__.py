@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
+from netdisc import merge_networks, NetworkSchema
 import arrow
 
-from schemas.network import NetworkSchema
 from libs.network import NetworkDevice
-from libs.common import merge_networks
 from libs.config import config
 from libs.db import NetworkDatabaseModel, SessionLocal, engine, Base
 
