@@ -1,4 +1,5 @@
 # NetworkSearch
+
 A (work in progress) simple app to catalog and allow you to search your networks based on collecting and normalizing network data from the vendor devices directly.
 
 ## Basic Setup
